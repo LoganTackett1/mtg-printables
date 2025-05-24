@@ -4,8 +4,10 @@ import { GET_deckDict, generateStack, createPages, textToImages } from '../util/
 function FileProcessor ({fileProps, fileUploaded, processingStatus, setProcessingStatus, processing, setProcessing}) {
 
     function handleClick () {
-        if (processing || !fileUploaded) {
+        if (!fileUploaded) {
             setProcessingStatus({code:-1,message:"Valid file required!"});
+            return;
+        } else if (processing) {
             return;
         } else {
             setProcessing(true);

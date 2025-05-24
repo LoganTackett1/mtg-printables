@@ -96,7 +96,7 @@ export async function createPages (deckStack,deckDict,setStatus) {
                 img.onload = () => {
                     const row = Math.floor(i/3);
                     const col = i % 3;
-                    ctx.drawImage(img, col * 750, row * 1050, 750, 1050);
+                    ctx.drawImage(img, col * 750 + 150, row * 1050 + 75, 750, 1050);
                     resolve();
                 };
                 img.onerror = () => {
