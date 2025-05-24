@@ -2,7 +2,6 @@ export async function GET_cardJSON (code,number,setStatus) {
     let cardJSON = {code:code,number:number,twoSided:false,imageURIs:[]};
     const response = await fetch(`https://api.scryfall.com/cards/${code}/${number}`);
     if (!response.ok) {
-        setStatus({code:-1,message:`Could not pull json data for card with code: ${code} number: ${number}`});
         return false; // returns false on error
     }
     const json = await response.json();

@@ -1,5 +1,5 @@
 import { GET_cardJSON } from "./scryfall";
-import JSZip from "jszip";
+import jsPDF from "jspdf";
 import { saveAs } from "file-saver";
 
 //fileLinesArr is the archidect text file
@@ -18,7 +18,7 @@ export function validateArchidekt (fileLinesArr) {
             console.log("failed on number");
             return false;
         }
-        if (!/^[1-9]\d*x$/.test(count)) {
+        if (!/^[1-9][0-9]*$/.test(count)) {
             console.log("failed on count");
             return false;
         }
@@ -28,16 +28,20 @@ export function validateArchidekt (fileLinesArr) {
 
 export async function GET_deckDict (fileLinesArr,setStatus) {
     const deckDict = {};
+    let lineCount = 1;
     for (let line of fileLinesArr) {
+        setStatus({code:0,message:`Generating deck dictionary: line ${lineCount}`});
         const currLine = line.split(" ");
         const code = currLine[currLine.length-2].slice(1,-1);
         const number = currLine[currLine.length-1]
 
         const cardJSON = await GET_cardJSON(code,number,setStatus);
         if (cardJSON == false) {
+            setStatus({code:-1,message:`Could not pull json data for following card: ${line}`});
             return false;
         }
         deckDict[`${code},${number}`] = cardJSON;
+        lineCount++;
     }
     return deckDict;
 }
@@ -46,7 +50,7 @@ export function generateStack (fileLinesArr,deckDict) {
     const stack = [];
     for (let line of fileLinesArr) {
         const currLine = line.split(" ");
-        const count = Number(currLine[0].slice(0,-1));
+        const count = Number(currLine[0]);
         const code = currLine[currLine.length-2].slice(1,-1);
         const number = currLine[currLine.length-1];
 
@@ -63,7 +67,11 @@ export function generateStack (fileLinesArr,deckDict) {
 
 
 export async function createPages (deckStack,deckDict,setStatus) {
-    const zip = new JSZip();
+    const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "in",
+        format: [8.5, 11],
+    });
     let pageCount = 0;
     let cardCount = 0;
 
@@ -103,13 +111,14 @@ export async function createPages (deckStack,deckDict,setStatus) {
             i++;
             cardCount++;
         }
-        const blob = await new Promise((resolve) => blankPage.toBlob(resolve, "image/png"));
-        zip.file(`page_${pageCount + 1}.png`, blob);
+        const imgData = blankPage.toDataURL("image/jpeg", 1.0);
+        if (pageCount != 0) {
+            pdf.addPage();
+        }
+        pdf.addImage(imgData, "JPEG", 0, 0, 8.5, 11);
         pageCount++;
     }
-
-    const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "deck_pages.zip");
+    pdf.save("deck-pages.pdf");
 }
 
 export async function textToImages (fileLinesArr,setStatus) {
