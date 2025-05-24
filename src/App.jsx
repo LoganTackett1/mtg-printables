@@ -1,33 +1,22 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import FileUploader from './components/FileUploader'
+import FileProcessor from './components/FileProcessor';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [fileProps,setFileProps] = useState({name:null,content:[]});
+  const [fileUploaded,setFileUploaded] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState({code:0,message:"Nothings happening here."}); //codes: 0 is neutral, -1 is bad and 1 is good.
+  const [processing, setProcessing] = useState(false);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1 className="text-[50px] p-[20px]">MTG Printables Generator</h1>
+      <FileUploader fileProps={fileProps} setFileProps={setFileProps} fileUploaded={fileUploaded} 
+                    setFileUploaded={setFileUploaded} processing={processing} setProcessing={setProcessing}
+                    processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} />
+      <FileProcessor fileProps={fileProps} fileUploaded={fileUploaded} processing={processing} 
+                    setProcessing={setProcessing} processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} />
     </>
   )
 }

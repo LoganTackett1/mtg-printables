@@ -1,0 +1,125 @@
+import { GET_cardJSON } from "./scryfall";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+
+//fileLinesArr is the archidect text file
+export function validateArchidekt (fileLinesArr) {
+    for (let line of fileLinesArr) {
+        const currLine = line.split(" ");
+        const code = currLine[currLine.length-2];
+        const number = currLine[currLine.length-1]
+        const count = currLine[0];
+
+        if (!/^\([^\s()]+\)$/.test(code)) {
+            console.log("failed on code");
+            return false;
+        }
+        if (!/^[^\s()]+$/.test(number)) {
+            console.log("failed on number");
+            return false;
+        }
+        if (!/^[1-9]\d*x$/.test(count)) {
+            console.log("failed on count");
+            return false;
+        }
+    }
+    return true;
+}
+
+export async function GET_deckDict (fileLinesArr,setStatus) {
+    const deckDict = {};
+    for (let line of fileLinesArr) {
+        const currLine = line.split(" ");
+        const code = currLine[currLine.length-2].slice(1,-1);
+        const number = currLine[currLine.length-1]
+
+        const cardJSON = await GET_cardJSON(code,number,setStatus);
+        if (cardJSON == false) {
+            return false;
+        }
+        deckDict[`${code},${number}`] = cardJSON;
+    }
+    return deckDict;
+}
+
+export function generateStack (fileLinesArr,deckDict) {
+    const stack = [];
+    for (let line of fileLinesArr) {
+        const currLine = line.split(" ");
+        const count = Number(currLine[0].slice(0,-1));
+        const code = currLine[currLine.length-2].slice(1,-1);
+        const number = currLine[currLine.length-1];
+
+        let cardJSON = deckDict[`${code},${number}`];
+        if (cardJSON.twoSided) {
+            stack.push({count:count,code:code,number:number,front:true});
+            stack.push({count:count,code:code,number:number,front:false});
+        } else {
+            stack.push({count:count,code:code,number:number,front:true});
+        }
+    }
+    return stack;
+}
+
+
+export async function createPages (deckStack,deckDict,setStatus) {
+    const zip = new JSZip();
+    let pageCount = 0;
+    let cardCount = 0;
+
+    while (deckStack.length > 0) {
+        const blankPage = document.createElement('canvas');
+        const ctx = blankPage.getContext("2d");
+        blankPage.width = 2550; // assumes 8.5"x11" printer paper at 300 DPI
+        blankPage.height = 3300;
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, blankPage.width, blankPage.height);
+        
+        let i = 0;
+        while (deckStack.length > 0 && i < 9) {
+            setStatus({code:0,message:`Drawing page ${pageCount + 1}, card ${cardCount + 1}`});
+            const currCard = deckStack[deckStack.length-1];
+            const currJSON = deckDict[`${currCard.code},${currCard.number}`];
+
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = (currCard.front ? currJSON.imageURIs[0] : currJSON.imageURIs[1]);
+            await new Promise((resolve) => {
+                img.onload = () => {
+                    const row = Math.floor(i/3);
+                    const col = i % 3;
+                    ctx.drawImage(img, col * 750, row * 1050, 750, 1050);
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.warn("Failed to load image: ", img.src);
+                    resolve();
+                }
+            });
+            currCard.count -= 1;
+            if (currCard.count == 0) {
+                deckStack.pop();
+            }
+            i++;
+            cardCount++;
+        }
+        const blob = await new Promise((resolve) => blankPage.toBlob(resolve, "image/png"));
+        zip.file(`page_${pageCount + 1}.png`, blob);
+        pageCount++;
+    }
+
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "deck_pages.zip");
+}
+
+export async function textToImages (fileLinesArr,setStatus) {
+    setStatus({code:0,message:"Generating deck dictionary"});
+    const deckDict = await GET_deckDict(fileLinesArr,setStatus);
+    if (deckDict == false) {
+        return false;
+    }
+    setStatus({code:0,message:"Generating deck stack"});
+    const deckStack = generateStack(fileLinesArr,deckDict);
+    await createPages(deckStack,deckDict,setStatus);
+    return true;
+}
