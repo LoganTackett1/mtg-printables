@@ -24,7 +24,7 @@ function App() {
         <li>3. Set "Export Type" to "Text".</li>
         <li>4. In "Export Options" make sure only "Include set code" and "Include collector number" are checked. All other boxes should be unchecked.</li>
         <li>5. All of the other options are up to you, click "Download" and drag that text file into the drop area. Note that these other options might include unwanted / out of deck cards (e.g. maybeboard)</li>
-        <li>6. Once the PDF is downloaded, print it out. When printing, make sure you select the following print options: "Page Size: Letter", "</li>
+        <li>6. Once the PDF is downloaded, print it out. When printing, make sure you select the following print options: "Page Size: Letter" and "Scale: Custom: 100%". DO NOT USE DEFAULT PRINT SETTINGS</li>
       </ul>
     </>
   )
