@@ -70,7 +70,7 @@ export async function createPages (deckStack,deckDict,setStatus) {
     const pdf = new jsPDF({
         orientation: "portrait",
         unit: "in",
-        format: [7.5, 10.5],
+        format: [8.5, 11],
     });
     let pageCount = 0;
     let cardCount = 0;
@@ -78,12 +78,14 @@ export async function createPages (deckStack,deckDict,setStatus) {
     while (deckStack.length > 0) {
         const blankPage = document.createElement('canvas');
         const ctx = blankPage.getContext("2d");
-        /*
+        
         blankPage.width = 2550; // assumes 8.5"x11" printer paper at 300 DPI
         blankPage.height = 3300;
-        */
+        
+       /*
         blankPage.width = 2250; // assumes 7.5"x10.5" printer paper at 300 DPI (testing)
         blankPage.height = 3150;
+        */
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, blankPage.width, blankPage.height);
         
@@ -100,8 +102,8 @@ export async function createPages (deckStack,deckDict,setStatus) {
                 img.onload = () => {
                     const row = Math.floor(i/3);
                     const col = i % 3;
-                    ctx.drawImage(img, col * 750, row * 1050, 750, 1050); // this is for 7.5x10.5 (fills space completely)
-                    //ctx.drawImage(img, col * 750 + 150, row * 1050 + 75, 750, 1050); // this is for 8.5x11 with centering
+                    //ctx.drawImage(img, col * 750, row * 1050, 750, 1050); // this is for 7.5x10.5 (fills space completely)
+                    ctx.drawImage(img, col * 750 + 150, row * 1050 + 75, 750, 1050); // this is for 8.5x11 with centering
                     resolve();
                 };
                 img.onerror = () => {
@@ -120,7 +122,7 @@ export async function createPages (deckStack,deckDict,setStatus) {
         if (pageCount != 0) {
             pdf.addPage();
         }
-        pdf.addImage(imgData, "JPEG", 0, 0, 7.5, 10.5);
+        pdf.addImage(imgData, "JPEG", 0, 0, 8.5, 11);
         pageCount++;
     }
     pdf.save("deck-pages.pdf");
