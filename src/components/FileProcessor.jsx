@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { GET_deckDict, generateStack, createPages, textToImages } from '../util/processing';
 import { filterArrs } from '../util/processing';
 
-function FileProcessor ({fileProps, fileTwoProps, fileUploaded, fileTwoUploaded, processingStatus, setProcessingStatus, processing, setProcessing, task}) {
+function FileProcessor ({fileProps, fileTwoProps, fileUploaded, fileTwoUploaded, processingStatus, setProcessingStatus, processing, setProcessing, task, setCardsRemoved}) {
 
     function handleClick () {
         if (task == "create") {
@@ -14,7 +14,7 @@ function FileProcessor ({fileProps, fileTwoProps, fileUploaded, fileTwoUploaded,
             } else {
                 setProcessing(true);
                 setProcessingStatus({code:0,message:"Reading File"});
-                textToImages(fileProps.content,setProcessingStatus)
+                textToImages(fileProps.content,setProcessingStatus,[])
                 .then((response) => {
                     if (response) {
                         setProcessingStatus({code:1,message:"Generation Completed!"});
@@ -37,9 +37,11 @@ function FileProcessor ({fileProps, fileTwoProps, fileUploaded, fileTwoUploaded,
                     setProcessing(false);
                     return;
                 }
-                textToImages(filter,setProcessingStatus)
+                const cardsRemoved = filterArrs(fileTwoProps.content,fileProps.content);
+                textToImages(filter,setProcessingStatus,cardsRemoved)
                 .then((response) => {
                     if (response) {
+                        setCardsRemoved(cardsRemoved);
                         setProcessingStatus({code:1,message:"Generation Completed!"});
                     }
                     setProcessing(false);

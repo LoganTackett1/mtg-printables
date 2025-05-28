@@ -11,6 +11,7 @@ function App() {
   const [processingStatus, setProcessingStatus] = useState({code:0,message:"Nothing happening here."}); //codes: 0 is neutral, -1 is bad and 1 is good.
   const [processing, setProcessing] = useState(false);
   const [task, setTask] = useState("create");
+  const [removedCards, setRemovedCards] = useState(["None Yet."]);
 
   function createBtnClick (e) {
     setTask("create");
@@ -55,7 +56,15 @@ function App() {
                     processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} />
       </div>
       <FileProcessor fileProps={fileProps} fileTwoProps={fileTwoProps} fileUploaded={fileUploaded} fileTwoUploaded={fileTwoUploaded} processing={processing} 
-                    setProcessing={setProcessing} processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} task={task} />
+                    setProcessing={setProcessing} processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} task={task} setCardsRemoved={setRemovedCards} />
+      <h2>Cards removed from deck:</h2>
+      <ul>
+        {removedCards.map((card,index) => {
+          return (<li key={index}>
+            {card}
+          </li>)
+        })}
+      </ul>
       <h2 className="mt-[30px] mb-[10px] text-[30px]">How to use:</h2>
       <ul className="text-[20px] w-1/2 mb-[30px] [&>li]:m-[10px]">
         <li>1. This tool is to print only the cards you need to update your deck after changes are made.</li>
