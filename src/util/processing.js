@@ -2,6 +2,35 @@ import { GET_cardJSON } from "./scryfall";
 import jsPDF from "jspdf";
 import { saveAs } from "file-saver";
 
+export function filterArrs (arr1, arr2) {
+    const result = [];
+    const map = {};
+    for (let el of arr1) {
+        if (el in map) {
+            map[el]++;
+        } else {
+            map[el] = 1;
+        }
+    }
+
+    for (let el of arr2) {
+        if (!(el in map)) {
+            result.push(el);
+        }
+    }
+
+    return result;
+}
+
+function parseCardInfo (line) {
+    const currLine = line.split(" ");
+    const count = Number(currLine[0]);
+    const code = currLine[currLine.length-2].slice(1,-1);
+    const number = currLine[currLine.length-1];
+
+    return [count,code,number];
+}
+
 //fileLinesArr is the archidect text file
 export function validateArchidekt (fileLinesArr) {
     for (let line of fileLinesArr) {
@@ -31,9 +60,8 @@ export async function GET_deckDict (fileLinesArr,setStatus) {
     let lineCount = 1;
     for (let line of fileLinesArr) {
         setStatus({code:0,message:`Generating deck dictionary: line ${lineCount}`});
-        const currLine = line.split(" ");
-        const code = currLine[currLine.length-2].slice(1,-1);
-        const number = currLine[currLine.length-1]
+        let code, number, count;
+        [count, code, number] = parseCardInfo(line);
 
         const cardJSON = await GET_cardJSON(code,number,setStatus);
         if (cardJSON == false) {
@@ -49,10 +77,8 @@ export async function GET_deckDict (fileLinesArr,setStatus) {
 export function generateStack (fileLinesArr,deckDict) {
     const stack = [];
     for (let line of fileLinesArr) {
-        const currLine = line.split(" ");
-        const count = Number(currLine[0]);
-        const code = currLine[currLine.length-2].slice(1,-1);
-        const number = currLine[currLine.length-1];
+        let code, number, count;
+        [count, code, number] = parseCardInfo(line);
 
         let cardJSON = deckDict[`${code},${number}`];
         if (cardJSON.twoSided) {
@@ -82,10 +108,6 @@ export async function createPages (deckStack,deckDict,setStatus) {
         blankPage.width = 2550; // assumes 8.5"x11" printer paper at 300 DPI
         blankPage.height = 3300;
         
-       /*
-        blankPage.width = 2250; // assumes 7.5"x10.5" printer paper at 300 DPI (testing)
-        blankPage.height = 3150;
-        */
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, blankPage.width, blankPage.height);
         
@@ -102,7 +124,6 @@ export async function createPages (deckStack,deckDict,setStatus) {
                 img.onload = () => {
                     const row = Math.floor(i/3);
                     const col = i % 3;
-                    //ctx.drawImage(img, col * 750, row * 1050, 750, 1050); // this is for 7.5x10.5 (fills space completely)
                     ctx.drawImage(img, col * 750 + 150, row * 1050 + 75, 750, 1050); // this is for 8.5x11 with centering
                     resolve();
                 };

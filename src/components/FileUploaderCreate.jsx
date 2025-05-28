@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { validateArchidekt } from '../util/processing';
 
-function FileUploader({fileProps, setFileProps, fileUploaded, setFileUploaded, processingStatus, setProcessingStatus, processing, setProcessing}) {
+function FileUploaderCreate({fileProps, setFileProps, fileUploaded, setFileUploaded, processingStatus, setProcessingStatus, processing, setProcessing, headerText}) {
     function handleFileUpload (e) {
         const file = e.target.files[0];
         if (!file) {
@@ -31,21 +31,23 @@ function FileUploader({fileProps, setFileProps, fileUploaded, setFileUploaded, p
 
     return (
         <>
-            <h2 className="text-[30px] p-[10px]">Upload your text file:</h2>
-            <label htmlFor="fileUpload" className="relative flex flex-col justify-center items-center w-[300px] h-[150px] bg-white text-black rounded-md">
-                <p>Drag and Drop</p>
-                <p>(Click to select file)</p>
-                <input id="fileUpload" name="fileUpload" className="absolute opacity-0 w-full h-full" type="file" accept=".txt" onChange={handleFileUpload}/>
-            </label>
-            {fileUploaded 
-            ? 
-            <h3 className="p-[5px]">File uploaded: {fileProps.name}</h3>
-            : 
-            <h3 className="p-[5px]">No file detected</h3>
-            }
+            <div className="flex flex-col items-center">
+                <h2 className="text-[30px] p-[10px]">{headerText}</h2>
+                <label htmlFor="fileUpload" className="relative flex flex-col justify-center items-center w-[300px] h-[150px] bg-white text-black rounded-md">
+                    <p>Drag and Drop</p>
+                    <p>(Click to select file)</p>
+                    <input id="fileUpload" name="fileUpload" className="absolute opacity-0 w-full h-full" type="file" accept=".txt" onChange={handleFileUpload}/>
+                </label>
+                {fileUploaded 
+                ? 
+                <h3 className="p-[5px]">File uploaded: {fileProps.name}</h3>
+                : 
+                <h3 className="p-[5px]">No file detected</h3>
+                }
+            </div>
         </>
     )
 }
 
 
-export default FileUploader;
+export default FileUploaderCreate;
