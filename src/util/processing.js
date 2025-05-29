@@ -1,21 +1,55 @@
+import { split } from "postcss/lib/list";
 import { GET_cardJSON } from "./scryfall";
 import jsPDF from "jspdf";
-import { saveAs } from "file-saver";
 
+function extractName (line) {
+    const splitLine = line.split(" ");
+    let result = "";
+    for (let i = 1; i < splitLine.length - 2; i++) {
+        result += splitLine[i] + " ";
+    }
+    return result;
+}
+
+//arr1 is old, arr2 is new
 export function filterArrs (arr1, arr2) {
     const result = [];
-    const map = {};
+    
+    const cardNames = {};
+    const oldCardCounts = {};
+    const newCardCounts = {};
+
     for (let el of arr1) {
-        if (el in map) {
-            map[el]++;
-        } else {
-            map[el] = 1;
-        }
+        let count, code, number;
+        [count,code,number] = parseCardInfo(el);
+        let name = extractName(el);
+        const key = `${code},${number}`;
+        cardNames[key] = name;
+        oldCardCounts[key] = Number(count);
     }
 
     for (let el of arr2) {
-        if (!(el in map)) {
-            result.push(el);
+        let count, code, number;
+        [count,code,number] = parseCardInfo(el);
+        let name = extractName(el);
+        const key = `${code},${number}`;
+        cardNames[key] = name;
+        newCardCounts[key] = Number(count);
+    }
+
+    for (let el of Object.keys(cardNames)) {
+        let code, number;
+        [code,number] = el.split(",");
+
+        if (el in newCardCounts && !(el in oldCardCounts)) {
+            result.push(`${newCardCounts[el]} ${cardNames[el]}(${code}) ${number}`);
+        } else if (el in newCardCounts && el in oldCardCounts) {
+            const countInOld = oldCardCounts[el];
+            const countInNew = newCardCounts[el];
+
+            if (countInNew > countInOld) {
+                result.push(`${countInNew-countInOld} ${cardNames[el]}(${code}) ${number}`);
+            }
         }
     }
 
