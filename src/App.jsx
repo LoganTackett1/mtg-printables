@@ -12,6 +12,7 @@ function App() {
   const [processing, setProcessing] = useState(false);
   const [task, setTask] = useState("create");
   const [removedCards, setRemovedCards] = useState(["None Yet."]);
+  const [pageRows,setPageRows] = useState(3);
 
   function createBtnClick (e) {
     setTask("create");
@@ -34,7 +35,8 @@ function App() {
                     setFileUploaded={setFileUploaded} processing={processing} setProcessing={setProcessing}
                     processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} />
       <FileProcessor fileProps={fileProps} fileUploaded={fileUploaded} processing={processing} 
-                    setProcessing={setProcessing} processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} task={task}/>
+                    setProcessing={setProcessing} processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} 
+                    task={task} pageRows={pageRows} setPageRows={setPageRows}/>
       <h2 className="mt-[30px] mb-[10px] text-[30px]">How to use:</h2>
       <ul className="text-[20px] w-1/2 mb-[30px] [&>li]:m-[10px]">
         <li>1. Have a deck you would like to print built on Archidekt.</li>
@@ -43,6 +45,7 @@ function App() {
         <li>4. In "Export Options" make sure only "Include set code" and "Include collector number" are checked. All other boxes should be unchecked.</li>
         <li>5. All of the other options are up to you, click "Download" and drag that text file into the drop area. Note that these other options might include unwanted / out of deck cards (e.g. maybeboard)</li>
         <li>6. Once the PDF is downloaded, print it out. When printing, make sure you select the following print options: "Page Size: Letter" and "Scale: Custom: 100%". DO NOT USE DEFAULT PRINT SETTINGS</li>
+        <li>7. If your printer does not support borderless printing and the margins are too large, you can change the rows per page from 3 to 2 to make them fit.</li>
       </ul>
       </>
       :
@@ -56,7 +59,8 @@ function App() {
                     processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} />
       </div>
       <FileProcessor fileProps={fileProps} fileTwoProps={fileTwoProps} fileUploaded={fileUploaded} fileTwoUploaded={fileTwoUploaded} processing={processing} 
-                    setProcessing={setProcessing} processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} task={task} setCardsRemoved={setRemovedCards} />
+                    setProcessing={setProcessing} processingStatus={processingStatus} setProcessingStatus={setProcessingStatus} task={task} setCardsRemoved={setRemovedCards}
+                    pageRows={pageRows} setPageRows={setPageRows} />
       <h2>Cards removed from deck:</h2>
       <ul>
         {removedCards.map((card,index) => {
@@ -74,6 +78,7 @@ function App() {
         <li>5. Drag the old deck file into the left upload area, and the new deck file into the right upload area.</li>
         <li>6. Once both text files are uploaded and are valid, click "Generate Printables".</li>
         <li>7. Once the PDF is downloaded, print it out. When printing, make sure you select the following print options: "Page Size: Letter" and "Scale: Custom: 100%". DO NOT USE DEFAULT PRINT SETTINGS</li>
+        <li>8. If your printer does not support borderless printing and the margins are too large, you can change the rows per page from 3 to 2 to make them fit.</li>
       </ul>
       </>
       }

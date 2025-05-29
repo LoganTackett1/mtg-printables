@@ -126,7 +126,7 @@ export function generateStack (fileLinesArr,deckDict) {
 }
 
 
-export async function createPages (deckStack,deckDict,setStatus,cardsRemoved) {
+export async function createPages (deckStack,deckDict,setStatus,pageRows) {
     const pdf = new jsPDF({
         orientation: "portrait",
         unit: "in",
@@ -147,7 +147,7 @@ export async function createPages (deckStack,deckDict,setStatus,cardsRemoved) {
         ctx.fillRect(0, 0, blankPage.width, blankPage.height);
         
         let i = 0;
-        while (deckStack.length > 0 && i < 9) {
+        while (deckStack.length > 0 && i < 3*pageRows) {
             setStatus({code:0,message:`Drawing page ${pageCount + 1}, card ${cardCount + 1}`});
             const currCard = deckStack[deckStack.length-1];
             const currJSON = deckDict[`${currCard.code},${currCard.number}`];
@@ -184,7 +184,7 @@ export async function createPages (deckStack,deckDict,setStatus,cardsRemoved) {
     pdf.save("deck-pages.pdf");
 }
 
-export async function textToImages (fileLinesArr,setStatus,cardsRemoved) {
+export async function textToImages (fileLinesArr,setStatus,pageRows) {
     setStatus({code:0,message:"Generating deck dictionary"});
     const deckDict = await GET_deckDict(fileLinesArr,setStatus);
     if (deckDict == false) {
@@ -192,6 +192,6 @@ export async function textToImages (fileLinesArr,setStatus,cardsRemoved) {
     }
     setStatus({code:0,message:"Generating deck stack"});
     const deckStack = generateStack(fileLinesArr,deckDict);
-    await createPages(deckStack,deckDict,setStatus,cardsRemoved);
+    await createPages(deckStack,deckDict,setStatus,pageRows);
     return true;
 }
